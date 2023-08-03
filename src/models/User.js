@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 
 // Define the User schema
-const User = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -19,6 +19,11 @@ const User = new mongoose.Schema({
       validator: (value) => validator.isEmail(value),
       message: (props) => `${props.value} is not a valid email address!`,
     },
+  },
+  password: {
+    type: String,
+    trim: true,
+    required: true,
   },
   mobileNumber: {
     type: String,
@@ -43,14 +48,26 @@ const User = new mongoose.Schema({
   ],
 });
 
-User.statics.findByEmail = async function (email) {
+userSchema.methods.updateImageUrl = async function (newImageUrl) {
+  this.imageUrl = newImageUrl;
+  await this.save();
+};
+
+userSchema.methods.createUser = async function (userData) {
+  const user = new this(userData);
+  await user.save();
+  return user;
+};
+
+userSchema.statics.findByEmail = async function (email) {
   const user = await this.findOne({ email });
   return user;
 };
 
-User.statics.findByMobileNumber = async function (mobileNumber) {
+userSchema.statics.findByMobileNumber = async function (mobileNumber) {
   const user = await this.findOne({ mobileNumber });
   return user;
 };
 
+const User = mongoose.model("User", userSchema);
 module.exports = User;

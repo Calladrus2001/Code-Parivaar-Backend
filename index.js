@@ -19,7 +19,7 @@ mongoose
   });
 
 // Using express routers
-app.use('auth/', authRouter);
+app.use(authRouter);
 
 // Server creation
 app.listen(3000, ()=> {
