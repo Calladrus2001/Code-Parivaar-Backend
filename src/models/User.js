@@ -1,8 +1,9 @@
+// Require necessary modules
 const mongoose = require("mongoose");
 const validator = require("validator");
 
-
-const User = mongoose.model("User", {
+// Define the User schema
+const User = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -11,31 +12,45 @@ const User = mongoose.model("User", {
   email: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
     lowercase: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error("Email is invalid");
-      }
+    validate: {
+      validator: (value) => validator.isEmail(value),
+      message: (props) => `${props.value} is not a valid email address!`,
     },
   },
-  contact: {
-    type: Number,
+  mobileNumber: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
     validate: {
-      validator: function (v) {
-        return /d{10}/.test(v);
-      },
-      message: "{VALUE} is not a valid 10 digit number!",
+      validator: (value) =>
+        validator.isMobilePhone(value, "any", { strictMode: false }),
+      message: (props) => `${props.value} is not a valid mobile number!`,
     },
   },
   imageUrl: {
-    type: URL,
-    required: false,
+    type: String,
     trim: true,
-    validate(value) {
-      if (!validator.URL(value)) {
-        throw new Error("URL is invalid");
-      }
-    },
   },
+  jwtTokens: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
 });
+
+User.statics.findByEmail = async function (email) {
+  const user = await this.findOne({ email });
+  return user;
+};
+
+User.statics.findByMobileNumber = async function (mobileNumber) {
+  const user = await this.findOne({ mobileNumber });
+  return user;
+};
+
+module.exports = User;
