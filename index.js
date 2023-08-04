@@ -1,14 +1,23 @@
-// imports
-const express = require('express');
-const authRouter = require('./src/routes/authRouter')
-const mongoose = require('mongoose');
+const http = require("http");
+const express = require("express");
+const socketio = require("socket.io");
+const mongoose = require("mongoose");
 
-// properties
+const authRouter = require("./src/routes/authRouter");
+const authMiddleware = require("./src/middleware/authMiddleware")
+
 const app = express();
 app.use(express.json());
+
+app.use(authRouter);
+
+const server = http.createServer(app);
+
+const io = socketio(server);
+io.use(authMiddleware);
+
 const port = process.env.PORT || 3000;
 
-// Connected to MongoDB
 mongoose
   .connect("mongodb://127.0.0.1:27017/CodeParivaar", {
     useNewUrlParser: true,
@@ -18,10 +27,9 @@ mongoose
     console.log("Connected to MongoDB");
   });
 
-// Using express routers
-app.use(authRouter);
-
-// Server creation
-app.listen(3000, ()=> {
-  console.log('listening on port 3000');
-});
+io.on('connection', (socket) => {
+    console.log(socket.toString());
+})
+server.listen(port, () => {
+    console.log(`Server is up on port ${port}!`)
+})

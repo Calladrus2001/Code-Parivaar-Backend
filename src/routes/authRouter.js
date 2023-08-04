@@ -36,7 +36,7 @@ authRouter.post("/createUser", async (req, res) => {
     newUser.jwtTokens.push(token);
     await newUser.save();
 
-    res.status(201).json({ user: newUser, token });
+    res.status(201).json({ token });
   } catch (error) {
     res.status(500).json({ error: "Failed to create user" });
     console.log(error)

@@ -46,7 +46,36 @@ const userSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  groups: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group'
+    }
+  ],
+  admin: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Group", // Reference to the Group model
+    },
+  ]
 });
+
+// Method to make a user an admin of a group
+userSchema.methods.makeAdminOfGroup = async function(groupId) {
+  if (!this.admin.includes(groupId)) {
+    this.admin.push(groupId);
+    await this.save();
+  }
+};
+
+// Method to remove a user as an admin of a group
+userSchema.methods.removeAsAdminFromGroup = async function(groupId) {
+  const index = this.admin.indexOf(groupId);
+  if (index !== -1) {
+    this.admin.splice(index, 1);
+    await this.save();
+  }
+};
 
 userSchema.methods.updateImageUrl = async function (newImageUrl) {
   this.imageUrl = newImageUrl;

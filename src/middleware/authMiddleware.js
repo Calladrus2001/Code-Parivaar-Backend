@@ -1,18 +1,18 @@
-require("dotenv").config()
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../models/User"); // Assuming you have a User model defined
 
-async function checkTokenValidity(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1]; // Assuming 'Authorization: Bearer <token>'
+async function checkTokenValidity(socket, next) {
+  const token = socket.handshake.auth.token;
+
   if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
+    return next(new Error("Authentication token not provided"));
   }
 
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_HASH_KEY);
     const userId = decodedToken._id;
 
-    // Check if the token is about to expire 
+    // Check if the token is about to expire
     const currentTime = Math.floor(Date.now() / 1000);
     const tokenExpiration = decodedToken.exp;
     const timeToExpiration = tokenExpiration - currentTime;
@@ -30,19 +30,16 @@ async function checkTokenValidity(req, res, next) {
       user.jwtTokens.push(newToken);
       await user.save();
 
-      res.set('New-Token', newToken);
+      // Attach the new token to the socket for the client to update it
+      socket.handshake.auth.token = newToken;
     }
 
-    // Token is valid, proceed with the request
-    req.userId = userId;
+    // Token is valid, proceed with the connection
+    socket.userId = userId;
     next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Token expired' });
-    }
-    return res.status(401).json({ error: 'Invalid token' });
+    next(new Error("Authentication failed"));
   }
 }
-
 
 module.exports = checkTokenValidity;
