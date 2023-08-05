@@ -94,6 +94,11 @@ userSchema.statics.findByEmail = async function (email) {
   return user;
 };
 
+userSchema.statics.findByName = async function (name) {
+  const user = await this.findOne({ name });
+  return user;
+};
+
 userSchema.statics.findByToken = function (token) {
   const User = this;
   let decodedToken;

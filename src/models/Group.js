@@ -23,23 +23,18 @@ const groupSchema = new mongoose.Schema({
   },
 });
 
-// Define an index on the participants field for faster queries
 groupSchema.index({ participants: 1 });
 
-// Static method to create a new group
-groupSchema.statics.createGroup = async function(name, participants) {
-  const group = new this({ name, participants });
-  await group.save();
-  return group;
-};
-
-// Static method to fetch a group by its ID
 groupSchema.statics.fetchGroupById = async function(groupId) {
   const group = await this.findById(groupId).populate('participants', 'name');
   return group;
 };
 
-// Static method to delete a group by its ID
+groupSchema.statics.fetchGroupByName = async function (GroupName) {
+  const group = await this.findOne(GroupName).populate("participants", "name");
+  return group;
+};
+
 groupSchema.statics.deleteGroup = async function(groupId) {
   const group = await this.findByIdAndDelete(groupId);
   if (!group) {

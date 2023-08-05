@@ -4,11 +4,13 @@ const socketio = require("socket.io");
 const mongoose = require("mongoose");
 
 const authRouter = require("./src/routes/authRouter");
-const authMiddleware = require("./src/middleware/authMiddleware")
+const chatRouter = require("./src/routes/chatRouter");
+const authMiddleware = require("./src/middleware/authMiddleware");
 
 const app = express();
 app.use(express.json());
 app.use(authRouter);
+app.use(chatRouter);
 
 const server = http.createServer(app);
 const io = socketio(server);
