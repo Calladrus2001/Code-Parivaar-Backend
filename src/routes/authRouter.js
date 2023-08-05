@@ -66,7 +66,7 @@ authRouter.post("/loginUser", async (req, res) => {
     user.jwtTokens.push(token);
     await user.save();
 
-    res.status(200).json({ user, token });
+    res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ error: "Failed to login" });
   }
@@ -89,6 +89,7 @@ authRouter.post("/logout", async (req, res) => {
 
     res.status(200).json({ message: "User successfully logged out" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Failed to logout" });
   }
 });

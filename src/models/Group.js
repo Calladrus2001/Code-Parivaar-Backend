@@ -11,6 +11,16 @@ const groupSchema = new mongoose.Schema({
       ref: "User", // Reference to the User model
     },
   ],
+  messages: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message", // Reference to the Message model
+    },
+  ],
+  imageUrl: {
+    type: String,
+    trim: true,
+  },
 });
 
 // Define an index on the participants field for faster queries

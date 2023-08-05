@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // Assuming you have a User model defined
+const User = require("../models/User"); 
 
 async function checkTokenValidity(socket, next) {
   const token = socket.handshake.auth.token;

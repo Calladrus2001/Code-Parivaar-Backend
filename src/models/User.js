@@ -1,6 +1,7 @@
 // Require necessary modules
 const mongoose = require("mongoose");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
 
 // Define the User schema
 const userSchema = new mongoose.Schema({
@@ -43,7 +44,7 @@ const userSchema = new mongoose.Schema({
   jwtTokens: [
     {
       type: String,
-      required: true,
+      required: false,
     },
   ],
   groups: [
@@ -92,6 +93,23 @@ userSchema.statics.findByEmail = async function (email) {
   const user = await this.findOne({ email });
   return user;
 };
+
+userSchema.statics.findByToken = function (token) {
+  const User = this;
+  let decodedToken;
+
+  try {
+    decodedToken = jwt.verify(token, process.env.JWT_HASH_KEY);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  return User.findOne({
+    _id: decodedToken._id,
+    jwtTokens: token,
+  });
+};
+
 
 userSchema.statics.findByMobileNumber = async function (mobileNumber) {
   const user = await this.findOne({ mobileNumber });

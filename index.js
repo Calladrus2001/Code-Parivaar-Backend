@@ -8,11 +8,9 @@ const authMiddleware = require("./src/middleware/authMiddleware")
 
 const app = express();
 app.use(express.json());
-
 app.use(authRouter);
 
 const server = http.createServer(app);
-
 const io = socketio(server);
 io.use(authMiddleware);
 
@@ -28,8 +26,8 @@ mongoose
   });
 
 io.on('connection', (socket) => {
-    console.log(socket.toString());
+  console.log("New connection");
 })
 server.listen(port, () => {
-    console.log(`Server is up on port ${port}!`)
+  console.log(`Server is up on port ${port}!`)
 })
