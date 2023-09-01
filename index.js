@@ -4,17 +4,19 @@ const socketio = require("socket.io");
 const mongoose = require("mongoose");
 
 const authRouter = require("./src/routes/authRouter");
-const chatRouter = require("./src/routes/chatRouter");
+const groupRouter = require("./src/routes/groupRouter");
+const chatSocket = require("./src/controllers/sockets/chatSocket");
 const authMiddleware = require("./src/middleware/authMiddleware");
 
 const app = express();
 app.use(express.json());
 app.use(authRouter);
-app.use(chatRouter);
+app.use(groupRouter);
 
 const server = http.createServer(app);
 const io = socketio(server);
-io.use(authMiddleware);
+chatSocket(io);
+// io.use(authMiddleware);
 
 const port = process.env.PORT || 3000;
 
@@ -27,9 +29,6 @@ mongoose
     console.log("Connected to MongoDB");
   });
 
-io.on('connection', (socket) => {
-  console.log("New connection");
-})
 server.listen(port, () => {
-  console.log(`Server is up on port ${port}!`)
-})
+    console.log(`Server is up on port ${port}!`)
+});

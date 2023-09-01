@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Group = require("../models/Group");
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -90,4 +91,48 @@ const logout = async (req, res) => {
     res.status(500).json({ error: "Failed to logout" });
   }
 }
-module.exports = {createUser, loginUser, logout};
+
+const deleteUser = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+
+    // Find the user to be deleted
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Remove user from all groups
+    const userGroups = user.groups || [];
+
+    for (const groupId of userGroups) {
+      const group = await Group.findById(groupId);
+
+      if (!group) {
+        // Group not found, skip
+        continue;
+      }
+
+      // Remove user from participants
+      group.participants = group.participants.filter(participantId => participantId.toString() !== userId);
+
+      // If group has no participants, delete it
+      if (group.participants.length === 0) {
+        await Group.findByIdAndDelete(groupId);
+      } else {
+        await group.save();
+      }
+    }
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    return res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+}
+
+module.exports = {createUser, loginUser, logout, deleteUser};
