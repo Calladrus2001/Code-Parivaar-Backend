@@ -1,6 +1,5 @@
 const User = require("../models/User");
 const Group = require("../models/Group");
-const Message = require("../models/Message");
 
 const createGroup = async (req, res) => {
   try {
@@ -34,36 +33,17 @@ const createGroup = async (req, res) => {
 
 const deleteGroup = async (req, res) => {
   try {
-    const groupId = req.params.groupId; // Assuming the group ID is part of the request URL
-
-    // Find the group to be deleted
+    const groupId = req.body.groupId; 
     const group = await Group.findById(groupId);
 
     if (!group) {
       return res.status(404).json({ error: "Group not found" });
     }
-
-    // Remove group reference from participants
-    const participantIds = group.participants || [];
-
-    for (const participantId of participantIds) {
-      const user = await User.findById(participantId);
-
-      if (user) {
-        user.groups = user.groups.filter(
-          (userGroupId) => userGroupId.toString() !== groupId
-        );
-        await user.save();
-      }
-    }
-
-    // Delete messages associated with the group
-    await Message.deleteMany({ group: groupId });
-
-    // Delete the group
-    await Group.findByIdAndDelete(groupId);
-
-    return res.status(200).json({ message: "Group deleted successfully" });
+    
+    await Group.deleteGroupById(groupId);
+    return res.status(200).json({
+      "message": "Group deleted successfully"
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Server error" });
