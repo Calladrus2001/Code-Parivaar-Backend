@@ -13,8 +13,7 @@ const groupSchema = new mongoose.Schema({
   ],
   messages: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message", // Reference to the Message model
+      type: Object,
     },
   ],
   imageUrl: {
@@ -26,16 +25,16 @@ const groupSchema = new mongoose.Schema({
 groupSchema.index({ participants: 1 });
 
 groupSchema.statics.fetchGroupById = async function(groupId) {
-  const group = await this.findById(groupId).populate('participants', 'name');
+  const group = await this.findById(groupId);
   return group;
 };
 
 groupSchema.statics.fetchGroupByName = async function (GroupName) {
-  const group = await this.findOne(GroupName).populate("participants", "name");
+  const group = await this.findOne({GroupName});
   return group;
 };
 
-groupSchema.statics.deleteGroup = async function(groupId) {
+groupSchema.statics.deleteGroupById = async function(groupId) {
   const group = await this.findByIdAndDelete(groupId);
   if (!group) {
     throw new Error('Group not found');
@@ -51,6 +50,5 @@ groupSchema.statics.deleteGroup = async function(groupId) {
   return group;
 };
 
-// Create the Group model
 const Group = mongoose.model("Group", groupSchema);
 module.exports = Group;

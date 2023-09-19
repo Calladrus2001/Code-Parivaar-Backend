@@ -1,23 +1,17 @@
+const Group = require("../../models/Group");
+
 module.exports = (io) => {
-  
   const onlineUsers = new Map();
 
-  io.on('connection', (socket) => {
+  io.on("connection", (socket) => {
     const email = socket.handshake.headers.email;
     onlineUsers.set(socket.id, email);
-    console.log(`${socket.id} connected as ${email}`)
-    //TODO: check for pending messages
+    console.log(`${socket.id} connected as ${email}`);
 
-    socket.on('message', (message) => {
+    socket.on("message", (message) => {
       const groupID = message.groupID;
       io.to(groupID).emit(`${groupID}`, message);
-      console.log(message);
-    });
-
-    socket.on('config', (config) => {
-      const groupID = config.groupID;
-      socket.join(groupID);
-      console.log(`${socket.id} has joined ${config.groupID}`)
+      addMsgToGroup(message, email);
     });
 
     socket.on("disconnect", () => {
@@ -25,4 +19,24 @@ module.exports = (io) => {
       console.log(`${socket.id} disconnected`);
     });
   });
-}
+};
+
+const addMsgToGroup = async (message, email) => {
+  try {
+    const group = await Group.findById(message.groupId);
+
+    if (!group) {
+      console.log("Group not found");
+      return;
+    }
+    
+    group.messages.push({
+      content: message.content,
+      senderEmail: email,
+      groupId: message.groupId,
+    });
+    await group.save();
+  } catch (e) {
+    console.log(e);
+  }
+};
